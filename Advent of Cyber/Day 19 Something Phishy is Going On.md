@@ -1,0 +1,2 @@
+# Something Phishy is Going On
+McSkidy received reports of multiple phishing attempts from various elves. One of the elves shared the email that was sent to her with an attachment. The email forwarded was a .eml file, along with base64 encoded  string in a text file.

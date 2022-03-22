@@ -30,7 +30,7 @@ http://webapp.thm/get.php?file=userCV.pdf
 
 Once you find an entry point, we need to understand how this data could be processed within the application. The following example of PHP code is vulnerability to LFI
 
-```scheme
+```php
 <?PHP
 	include($_GET["file"]);
 ?>

@@ -51,3 +51,59 @@ Talking about ARP scans, you can use a built in ARP scanner `arp-scan`; it provi
 ### Nmap Host discovery using ICMP
 We can ping every IP address on a target network and see who would respond to our `ping` (ICMP Type 8/Echo) requests with a ping reply (ICMP Type 0). This would be good to use; however, modern Windows OS machines have ICMP traffic blocked by the firewall by default so the host would appear to be down.
 
+Echo requests
+`nmap -PR -sn TARGET`
+
+Because ICMP echo requests tend to be blocked, you might also consider ICMP Timestamp or ICMP Address Mask requests to tell if a system is online. Nmap uses timestamp request (ICMP Type 13) and checks whether it will get a Timestamp reply (ICMP type 14). Adding the `-PP` option tells Nmap to use ICMP timestamp requests. 
+
+`nmap -PP -sn MACHINE_IP/24`
+
+Similarly, Nmap uses address mask queries (ICMP Type 17) and checks whether it gets an address mask reply (ICMP Type 18). This scan can be enabled with the `-PM`.
+
+`nmap -PM -sn TARGET`
+
+
+### Nmap Host Discovery Using TCP and UDP
+
+**TCP SYN Ping**
+We can send a packet with the SYN (Synchronize) flag set to a TCP port, 80 by default, and wait for a response. An open port should reply with a SYN/ACK (Acknowledge); a closed port would respond with a RST packet (reset).
+
+If you want Nmap to use TCP SYN ping, you can do so via option `-PS` followed by the port number range, list, or a combination of them. For example, `-PS21` will target port 21, while `-PS21-25` will target ports 21,22,23,24, and 25.
+
+Privileged users can send TCP SYN packets and don't need to complete the TCP 3-way handshake even if the port is open
+
+`nmap -PS -sn TARGET`
+
+**TCP ACK ping**
+As you have guessed, this sends a packet with an ACK flag set. You must be running Nmap as a privileged user to be able to acomplish this.
+
+By default, port 80 is used. The syntax is `-PA` followed by a port range if you want.
+
+**UDP Ping**
+You can use UDP to discover if a host is online. Contrary to TCP SYN ping, sending a UDP packet to an open port is not expected to lead to any reply. However, if we send a UDP packet to a closed UDP port, we expect to get an ICMP port unreachable packet; indicating the target system is up and available.
+
+A UDP packet sent to an open UDP port and not triggering any response. However, sending a UDP packet to any closed UDP port can trigger a response indirectly indicating that the target is online.
+
+`nmap -PU -sn TARGET`
+
+**Masscan**
+On a side note, Masscan uses a similar approach to discover the available systems. However, to finish its network scan quickly, Masscan is quite aggresive with the rate of packets it generates. The syntax quite similar: `-p` can be followed by a port number, list, or range. Consider:
+- `masscan IP/24 -p443`
+- `masscan IP/24 -p80,443`
+- `masscan IP/24 -p22-25`
+- `masscan IP/24 --top-ports 100`
+
+### Using Reverse-DNS Lookup
+Nmap's default behaviour is to use reverse-DNS online hosts. Because the hostnames can reveal a lot, this can be a helpful step. However, if you don't want to send such DNS queries, you can use `-n` to skip this step.
+
+By default, Nmap will look up online hosts; however, you can use the option `-R` to query the DNS server even for offline hosts. If you want to use a specific DNS server, you can add the `--dns-servers DNS_SERVER` option.
+
+### Summary
+- ARP Scan => `sudo nmap -PR -sn TARGET`
+- ICMP Echo Scan => `sudo nmap -PE -sn TARGET`
+- ICMP Timestamp Scan => `sudo nmap -PP -sn TARGET`
+- ICMP Address Mask Scan => `sudo nmap -PM -sn TARGET`
+- TCP SYN ping => `sudo nmap -PS22,80 -sn TARGET`
+- TCP ACK ping => `sudo nmap -PA -sn TARGET`
+- UDP ping => `sudo nmap -PU -sn TARGET`
+

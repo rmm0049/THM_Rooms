@@ -12,7 +12,7 @@ It requires a config file in order to tell the binary how to analyze the events 
 This event will look for any processes that hvae been created. You can use this to look for known suspicious processes or processes with typos that would be considered an anomaly.. This event will use the CommandLine and Image XML tags.
 
 ex)
-```scheme
+```xml
 <RuleGroup name="" groupRelation="or">  
 <ProcessCreate onmatch="exclude">  
   <CommandLine condition="is">C:\Windows\system32\svchost.exe -k appmodel -p -s camsvc</CommandLine>  
@@ -25,7 +25,7 @@ This rule excludes the svchost.exe process from the logs
 The network connection event will look for events that occur remotely. This will include files and sources of suspicious binaries as well as opened ports. This event will use the Image and DestinationPort XML tags.
 
 ex)
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <NetworkConnect onmatch="include">  
   <Image condition="image">nmap.exe</Image>  
@@ -39,7 +39,7 @@ This will identify files transmitted over open ports, in this case it's specific
 This event will look for DLLs loaded by processes, which is useful when hunting for DLL injection and DLL Hijacking attacks. It is recommended to exercise caution when using this Event ID as it causes a high system load. It will use the Image, Signed, ImageLoaded, and Signature XML tags.
 
 ex)
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <ImageLoad onmatch="include">  
   <ImageLoaded condition="contains">\Temp\</ImageLoaded>  
@@ -51,7 +51,7 @@ This will look for DLLs that have been loaded within the \Temp\ directory.
 ##### Event ID 8: CreateRemoteThread
 Will monitor for processes injecting code into other processes. The CreateRemoteThread function is used for legimate tasks and applications. However, it could be used by malware to hide malicious activity. This event will use the SourceImage, TargetImage, StartAddress, and StartFuction XML tags.
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <CreateRemoteThread onmatch="include">  
   <StartAddress name="Alert,Cobalt Strike" condition="end with">0B80</StartAddress>  
@@ -64,7 +64,7 @@ This will look at the memory address for a specific ending condition "0B80" whic
 ##### Event ID 11: File Created
 Will log when files are created or overwritten the endpoint. This could be used to identify file names and signatures of files that are written to disk. This event uses TargetFilename XML tags.
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <FileCreate onmatch="include">  
   <TargetFilename name="Alert,Ransomware" condition="contains">HELP_TO_SAVE_FILES</TargetFilename>  
@@ -77,7 +77,7 @@ The above is an exmple of a ransomware event monitor. This is just one example o
 **Event ID 12 / 13/ 14: Registry Event**
 This event looks for changes or modifications to the registry. Malicious activity from the registry can include persistence and credential abuse. This event uses the TargetObject XML tags.
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <RegistryEvent onmatch="include">  
   <TargetObject name="T1484" condition="contains">Windows\System\Scripts</TargetObject>  
@@ -89,7 +89,7 @@ This will look for registry objects that are in "Windows\System\Scripts" directo
 ##### Event ID 15: FileCreateStreamHash
 Will look for any files created in an alternate data stream. This is common technique used by adversaries to hide malware. This event uses TargetFilename XML tags.
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <FileCreateStreamHash onmatch="include">  
   <TargetFilename condition="end with">.hta</TargetFilename  
@@ -101,7 +101,7 @@ The above code snippet will look for files with the .hta extension that have bee
 ##### Event ID 22: DNS Event
 WIll log all DNS queries and events for analysis. The most common way to deal with these events is to exclude all trusted domains that you know will be very common "noise" in your environment. This event uses the QueryName XML tags.
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <DnsQuery onmatch="exclude">  
   <QueryName condition="end with">.microsoft.com</QueryName>  
@@ -131,7 +131,7 @@ Metasploit is a commonly used exploit framework for penetration testing and red 
 
 First looking at a modified Ion-Security configuration to detect the creation of new network connections. The code snippet below will use event ID 3, along with the destination port to identify active connections specifically on port `4444` and `5555`.
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <NetworkConnect onmatch="include">  
 <DestinationPort condition="is">4444</DestinationPort>  
@@ -146,7 +146,7 @@ Mimikatz is used to dump credentials from memory along with other Windows post-e
 ##### Detecting File Creation
 First method hunting for Mimikatz is just looking for files created with the name Mimikatz. This is easy to get around though...
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <FileCreate onmatch="include">  
 <TargetFileName condition="contains">mimikatz</TargetFileName>  
@@ -175,7 +175,7 @@ There are a number of evasion techniques used by malware authors to both evade a
 ##### Hunting Alternate Data Streams
 Sysmon detects this using Event ID 15. It will hash and log any NTFS Streams that are included within the Sysmon configuration file. The below snippet will hunt for files in the `Temp` and `Startup` folder as well as `.hta` and `.bat` extensions.
 
-```scheme
+```xml
 `<RuleGroup name="" groupRelation="or">  
 <FileCreateStreamHash onmatch="include">  
 <TargetFilename condition="contains">Downloads</TargetFilename>  
